@@ -1,7 +1,7 @@
 from tkinter import *
 from typing import Collection
 from PIL import ImageTk, Image
-import webscraper
+import WebScraper
 
 root = Tk()
 root.title('Crypto Stats')
