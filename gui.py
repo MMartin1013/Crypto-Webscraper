@@ -4,27 +4,39 @@ from webscraper import WebScraper
 #Defines webscraper
 scraper = WebScraper()
 
+current = None
+
 #Initializes and defines dimensions for root window
 root = Tk()
-root.title('Crypto Stats')
+root.title('Crypto Stats from coinmarketcap.com')
 root.geometry('700x750')
 root.minsize(700,750)
 
 #Initializes frame to hold data
 frame = LabelFrame(root, text="Info", bg='white', fg ='black', padx=25,pady=25)
 frame.place(relx=0.5, rely=0.4, anchor=CENTER)
-placeholder = Label(frame, text='', bg='white').pack(padx=200, pady=200)
+Label(frame, text='1. Click trending for Trending cryptocurrencies\n\n2. Click Top 5 for the Top5 cryptocurrencies\n\n3. The values dynamically update', bg='white', fg='black', font='Helvetica 12').pack(padx=150, pady=150)
 
+#Displays directions
+def directions():
+    clear()
+    Label(frame, text='1. Click trending for Trending cryptocurrencies\n\n2. Click Top 5 for the Top5 cryptocurrencies\n\n3. The values dynamically update', bg='white', fg='black', font='Helvetica 12').pack(padx=150, pady=150)
 
 #Clears the frame
 def clear():
+    global current
     widgets = frame.pack_slaves()
     for widget in widgets:
         widget.destroy()
+    current = clear if current != directions else current
+
+
 
 #Displays trending data
 def trending():
     clear()
+    global current
+    current = trending
     trendinginfo = scraper.get_categories()
     for category in trendinginfo:
         Label(frame, text=category.name + ':', bg='white', fg='black', font='Helvetica 24 bold').pack(anchor='w')
@@ -46,6 +58,8 @@ def trending():
 #Displays top5 companies
 def topfive():
     clear()
+    global current
+    current = topfive
     top5 = scraper.get_table()
     for company in top5:
         Label(frame,text=company.rank + ' ' + company.name + ':', bg='white', fg='black',font='Helvetica 12 bold').pack(anchor='w')
@@ -59,8 +73,13 @@ def topfive():
         Label(formatframe,text=company.get_marketcap(), bg='white', fg='black',font='Helvetica 12').pack(side='left')
         Label(formatframe,text=company.get_volume(), bg='white', fg='black',font='Helvetica 12').pack(side='left')
         Label(frame,text=company.get_circulatingsupply(), bg='white', fg='black',font='Helvetica 12').pack()
+
+#Updates results every 5 seconds
+def update():
+    current()
+    root.after(5000,update)
     
-    
+current = directions if current == None else current
 
 
 #Title and buttons
@@ -70,4 +89,6 @@ trending_button = Button(root, text='Trending', command=lambda: trending()).plac
 top5_button = Button(root, text='Top 5', command=lambda: topfive()).place(relx=0.75, rely=0.8, anchor=CENTER)
 clear_button = Button(root, text='Clear', command=lambda: clear()).place(relx=0.5, rely=0.90, anchor=CENTER)
 
+#Starts loop
+root.after(5000, update)
 root.mainloop()
